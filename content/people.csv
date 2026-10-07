@@ -1,0 +1,36 @@
+id,name,relation,order
+nitin,Nitin,college-friend,15
+devika,Devika,college-friend,14
+omkar,Omkar,close-friend,12
+dipti,Dipti,close-friend,13
+chaitanya,Chaitanya,close-friend,1
+devendra,Devendra,close-friend,2
+aarti,Aarti,close-friend,3
+nishikant,Nishikant,close-friend,4
+piyu,Piyu,close-friend,5
+siddhesh,Siddhesh,close-friend,9
+nishigandha,Nishigandha,close-friend,10
+shubham,Shubham,close-friend,11
+sarvesh,Sarvesh,close-friend,6
+ulka,Ulka,close-friend,7
+shreya,Shreya,close-friend,8
+shinky,Shinky,close-friend,16
+yash-kotnis,Yash Kotnis,college-friend,17
+anurag-sil,Anurag Sil,college-friend,18
+sachin-kadam,Sachin Kadam,school-friend,19
+sanika,Sanika,school-friend,20
+paro,Paro,college-friend,21
+kunal-jadhav,Kunal Jadhav,college-friend,22
+kalai,Kalai,college-friend,23
+akhila,Akhila,relative,1
+prashant,Prashant,relative,2
+sumit,Sumit,in-laws,1
+didi,Didi,in-laws,2
+pappa,Pappa,in-laws,3
+mummy,Mummy,in-laws,4
+kachori,Kachori,family,1
+deepak-jiju,Deepak Jiju,family,2
+trupti-tai,Trupti Tai,family,3
+dada,Dada,family,4
+baba,Baba,family,5
+aai,Aai,family,6
