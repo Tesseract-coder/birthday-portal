@@ -133,11 +133,31 @@
     card.append(frag);
 
     const from = h("div", "from");
-    from.append(h("small", null, "with love,"), h("div", "name", msg.name));
+    const sign = h("div", "sign");
+    sign.append(h("small", null, "with love,"), h("div", "name", msg.name));
+    from.append(sign, buildAvatar(msg));
     card.append(from);
 
     section.append(card);
     return section;
+  }
+
+  // Profile picture, or their initial when there isn't one
+  function buildAvatar(msg) {
+    const av = h("div", "avatar");
+    if (msg.avatar) {
+      const img = h("img");
+      img.alt = "";
+      img.loading = "lazy";
+      img.decoding = "async";
+      img.src = msg.avatar;
+      img.addEventListener("click", () => openLightbox(msg.avatar));
+      av.append(img);
+    } else {
+      av.classList.add("initial");
+      av.textContent = msg.name.trim().charAt(0).toUpperCase();
+    }
+    return av;
   }
 
   function buildChapter(relation) {
@@ -163,8 +183,83 @@
   lb.addEventListener("click", closeLightbox);
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !lb.hidden) closeLightbox(); });
 
+  // ---------- background music ----------
+  // Loops content/music.*; fades out while any video plays, back in after.
+  const MUSIC_VOLUME = 0.5;
+  function setupMusic(src) {
+    const audio = new Audio(src);
+    audio.loop = true;
+    audio.preload = "auto";
+    const btn = $("#music");
+    btn.hidden = false;
+    let wanted = true; // false once she mutes it
+    let fadeTimer;
+
+    const videoPlaying = () =>
+      [...document.querySelectorAll("video")].some((v) => !v.paused && !v.ended);
+    const sync = () => {
+      btn.classList.toggle("on", !audio.paused);
+      btn.setAttribute("aria-pressed", String(wanted));
+    };
+
+    // Fixed number of steps: iOS ignores volume changes, so never wait on it
+    function fade(to, done) {
+      clearInterval(fadeTimer);
+      const from = audio.volume, steps = 20;
+      let i = 0;
+      fadeTimer = setInterval(() => {
+        i++;
+        audio.volume = i >= steps ? to : Math.min(1, Math.max(0, from + (to - from) * (i / steps)));
+        if (i >= steps) { clearInterval(fadeTimer); if (done) done(); }
+      }, 40);
+    }
+    function start() {
+      if (!wanted || videoPlaying() || document.hidden) return;
+      if (audio.paused) audio.volume = 0;
+      audio.play().then(() => { btn.classList.remove("intro"); fade(MUSIC_VOLUME); }).catch(() => {});
+    }
+    function stop() {
+      fade(0, () => { audio.pause(); });
+    }
+
+    audio.addEventListener("play", sync);
+    audio.addEventListener("pause", sync);
+    btn.addEventListener("click", () => {
+      // first tap (autoplay was blocked) means "play", not "mute"
+      if (wanted && audio.paused && !videoPlaying()) return start();
+      wanted = !wanted;
+      wanted ? start() : stop();
+      sync();
+    });
+
+    // Browsers only allow sound after a tap/click, so start on the first one
+    const firstTouch = (e) => {
+      if (btn.contains(e.target)) return;
+      document.removeEventListener("pointerdown", firstTouch, true);
+      document.removeEventListener("keydown", firstTouch, true);
+      start();
+    };
+    document.addEventListener("pointerdown", firstTouch, true);
+    document.addEventListener("keydown", firstTouch, true);
+
+    // Videos take priority
+    document.addEventListener("play", (e) => { if (e.target.tagName === "VIDEO") stop(); }, true);
+    const resume = (e) => { if (e.target.tagName === "VIDEO" && !videoPlaying()) start(); };
+    document.addEventListener("pause", resume, true);
+    document.addEventListener("ended", resume, true);
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) audio.pause(); else start();
+    });
+
+    start(); // works where the browser allows autoplay
+    sync();
+  }
+
   // ---------- render ----------
   function render(data) {
+    if (data.music) setupMusic(data.music);
+
     const root = $("#messages");
     for (const group of data.groups) {
       root.append(buildChapter(group.relation));

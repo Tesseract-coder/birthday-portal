@@ -11,6 +11,8 @@ Put every file directly in `content/` (no subfolders), named after the person's 
 | `nitin_msg.txt` | Text message (UTF-8; Marathi is fine) |
 | `nitin_1.jpg`, `nitin_2.png` | Photos and screenshots (`.jpg .jpeg .png .webp .gif`) |
 | `nitin_3.mp4` | Video (`.mp4` preferred; `.mov .webm .m4v` also work) |
+| `nitin_dp.jpg` | Profile picture next to their name (optional; otherwise their initial is shown) |
+| `music.mp3` | Background music for the whole site (`.m4a .ogg` also work); it fades out while a video plays |
 
 - Text is shown first, then all photos and videos in one swipeable gallery, sorted by number.
 - **Closing note:** `kunal_msg.txt`, plus optional `kunal_1.jpg`, and so on.

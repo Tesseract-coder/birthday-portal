@@ -126,7 +126,19 @@ section { padding: 0 20px; }
 
 .from {
   margin-top: 1.8rem; text-align: right;
+  display: flex; align-items: center; justify-content: flex-end; gap: 16px;
 }
+.avatar {
+  flex: none; width: 68px; height: 68px; border-radius: 50%; overflow: hidden;
+  box-shadow: 0 0 0 3px var(--cream), 0 0 0 4.5px var(--gold), 0 10px 24px -10px rgba(122, 52, 72, .45);
+}
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; cursor: zoom-in; }
+.avatar.initial {
+  display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--blush), #f3e1c7);
+  font-family: var(--serif); font-size: 2rem; font-weight: 500; color: var(--rose-deep);
+}
+@media (max-width: 420px) { .avatar { width: 56px; height: 56px; } .avatar.initial { font-size: 1.7rem; } }
 .from small {
   display: block; font-size: .72rem; letter-spacing: .3em; text-transform: uppercase; color: var(--muted);
 }
@@ -201,6 +213,25 @@ section { padding: 0 20px; }
   position: absolute; top: max(12px, env(safe-area-inset-top)); right: 14px;
   background: none; border: 0; color: #fff; font-size: 2.4rem; cursor: pointer; line-height: 1;
 }
+
+/* ---------- music toggle ---------- */
+.music-btn {
+  position: fixed; z-index: 5;
+  right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom));
+  display: flex; align-items: center; gap: 10px;
+  height: 46px; min-width: 46px; padding: 0 14px; border: 0; border-radius: 23px; cursor: pointer;
+  background: var(--card); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  color: var(--rose-deep); font: 400 .78rem var(--sans); letter-spacing: .12em;
+  box-shadow: 0 0 0 1px rgba(200, 162, 107, .45), var(--shadow);
+}
+.music-btn[hidden] { display: none; }
+.music-btn:not(.intro) .label { display: none; }
+.music-btn .eq { display: flex; align-items: flex-end; gap: 3px; height: 16px; }
+.music-btn .eq i { width: 3px; height: 30%; border-radius: 2px; background: currentColor; opacity: .55; }
+.music-btn.on .eq i { opacity: 1; animation: eq 1s ease-in-out infinite alternate; }
+.music-btn.on .eq i:nth-child(2) { animation-delay: -.4s; }
+.music-btn.on .eq i:nth-child(3) { animation-delay: -.7s; }
+@keyframes eq { from { height: 25%; } to { height: 100%; } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build the birthday site into dist/.
 
-Reads content/people.csv, matches files named <id>_<n>.<ext> or <id>_msg.txt,
+Reads content/people.csv, matches files named <id>_<n>.<ext>, <id>_msg.txt or <id>_dp.<img>,
 and writes dist/ (site files + content + manifest.json). Standard library only.
 
 Usage:  python3 build.py
@@ -25,8 +25,10 @@ CLOSING_ID = "kunal"  # kunal_msg.txt / kunal_1.jpg -> closing note
 IMAGE_EXT = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
 VIDEO_EXT = {".mp4", ".mov", ".webm", ".m4v"}
 TEXT_EXT = {".txt"}
+AUDIO_EXT = {".mp3", ".m4a", ".aac", ".ogg"}
+MUSIC_STEM = "music"  # content/music.mp3 -> background music
 
-FILE_RE = re.compile(r"^([a-z0-9-]+)_(\d+|msg)(\.[a-z0-9]+)$", re.IGNORECASE)
+FILE_RE = re.compile(r"^([a-z0-9-]+)_(\d+|msg|dp)(\.[a-z0-9]+)$", re.IGNORECASE)
 
 MAX_FILE_MB = 25  # Cloudflare Pages per-file limit
 WARN_IMAGE_MB = 2
@@ -65,10 +67,13 @@ def read_people():
 
 
 def scan_files():
-    """Return {id: [(sort_key, filename, kind)]}."""
-    found = {}
+    """Return ({id: [(sort_key, filename, kind)]}, {id: dp filename}, music filename)."""
+    found, avatars, music = {}, {}, None
     for p in sorted(CONTENT.iterdir()):
         if p.name == "people.csv" or p.name.startswith(".") or p.is_dir():
+            continue
+        if p.stem.lower() == MUSIC_STEM and p.suffix.lower() in AUDIO_EXT:
+            music = p.name
             continue
         m = FILE_RE.match(p.name)
         if not m:
@@ -93,10 +98,17 @@ def scan_files():
         if ext == ".mov":
             warn(f"'{p.name}' is .mov; some Android/Chrome browsers can't play it. Convert to .mp4 if possible.")
 
+        if n == "dp":
+            if kind == "image":
+                avatars[pid] = p.name
+            else:
+                warn(f"Skipped '{p.name}': profile picture must be an image")
+            continue
+
         # msg text comes first, then numbered files in order
         sort_key = -1 if n == "msg" else int(n)
         found.setdefault(pid, []).append((sort_key, p.name, kind))
-    return found
+    return found, avatars, music
 
 
 def build_items(entries):
@@ -113,10 +125,10 @@ def build_items(entries):
 
 def main():
     people = read_people()
-    files = scan_files()
+    files, avatars, music = scan_files()
 
     known = {p["id"] for p in people} | {CLOSING_ID}
-    for pid in files:
+    for pid in set(files) | set(avatars):
         if pid not in known:
             warn(f"Files for '{pid}' found but '{pid}' is not in people.csv; skipped.")
 
@@ -129,12 +141,17 @@ def main():
         for p in members:
             items = build_items(files.get(p["id"], []))
             if items:
-                messages.append({"name": p["name"], "items": items})
+                msg = {"name": p["name"], "items": items}
+                if p["id"] in avatars:
+                    msg["avatar"] = f"content/{avatars[p['id']]}"
+                messages.append(msg)
         if messages:
             groups.append({"relation": relation, "messages": messages})
 
     closing = build_items(files.get(CLOSING_ID, []))
     manifest = {"groups": groups, "closing": closing}
+    if music:
+        manifest["music"] = f"content/{music}"
 
     # Write dist/
     if DIST.exists():
@@ -142,14 +159,18 @@ def main():
     shutil.copytree(SITE, DIST)
     (DIST / "content").mkdir()
     used = {it["src"] for g in groups for m in g["messages"] for it in m["items"] if "src" in it}
+    used |= {m["avatar"] for g in groups for m in g["messages"] if "avatar" in m}
     used |= {it["src"] for it in closing if "src" in it}
+    if music:
+        used.add(manifest["music"])
     for src in used:
         shutil.copy2(ROOT / src, DIST / src)
     (DIST / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False), encoding="utf-8")
 
     total = sum(len(g["messages"]) for g in groups)
     print(f"Built dist/ with {total} messages across {len(groups)} groups"
-          f"{' + closing note' if closing else ''}.")
+          f"{' + closing note' if closing else ''}"
+          f"{' + music' if music else ' (no music: add content/music.mp3)'}.")
     # empty placeholder files don't count as content
     waiting = [p["name"] for p in people if not build_items(files.get(p["id"], []))]
     if waiting:
