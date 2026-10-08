@@ -16,6 +16,89 @@
   <div class="bg" aria-hidden="true">
     <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
   </div>
+  <div class="progress" id="progress" aria-hidden="true"></div>
+  <canvas class="fx" id="fx" aria-hidden="true"></canvas>
+
+  <!-- the birthday journey: music → balloon game → candles → cake → gift. No skipping. -->
+  <div class="journey" id="journey">
+    <header class="j-head" hidden>
+      <span class="j-pill">♡ a gift from Kunal</span>
+      <div class="j-progress" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <span class="j-step" id="j-step" aria-live="polite"></span>
+    </header>
+
+    <section class="scene active" data-scene="sound">
+      <div class="scene-card">
+        <div class="big-emoji" aria-hidden="true">🎵</div>
+        <p class="j-eyebrow">a little surprise awaits</p>
+        <h2>Ready for your birthday surprise, Gayatri?</h2>
+        <div class="j-actions">
+          <button class="j-btn primary" id="j-music" disabled>▶ Start with music</button>
+          <button class="j-btn ghost" id="j-quiet" disabled>continue quietly</button>
+        </div>
+        <p class="j-hint" id="j-sound-hint">you can change it anytime with the ♪ button</p>
+      </div>
+    </section>
+
+    <section class="scene" data-scene="balloons">
+      <div class="scene-top">
+        <p class="j-eyebrow">a little game for your 31st</p>
+        <h2>Pop 31 balloons</h2>
+        <p class="j-sub" id="j-balloon-msg">one for every beautiful year of you</p>
+        <div class="counter" aria-live="polite"><b id="j-count">0</b><span> / 31</span></div>
+      </div>
+      <div class="sky" id="j-sky"></div>
+      <div class="scene-bottom">
+        <button class="j-btn primary" id="j-to-cake" hidden>Next: make a wish →</button>
+      </div>
+    </section>
+
+    <section class="scene" data-scene="cake">
+      <div class="scene-top">
+        <p class="j-eyebrow" id="j-cake-eyebrow">close your eyes</p>
+        <h2 id="j-cake-title">Make a wish…</h2>
+        <p class="j-sub" id="j-cake-sub">then tap each flame to blow out your candles</p>
+      </div>
+      <div class="cake-stage" id="j-stage">
+        <div class="j-candles">
+          <button class="j-candle" aria-label="Blow out the 3">3<i class="flame"></i></button>
+          <button class="j-candle" aria-label="Blow out the 1">1<i class="flame"></i></button>
+        </div>
+        <div class="j-cake">
+          <div class="half left"><span class="cake-top"></span><span class="cake-body"></span></div>
+          <div class="half right"><span class="cake-top"></span><span class="cake-body"></span></div>
+        </div>
+        <span class="plate"></span>
+        <svg class="cut-trail" aria-hidden="true"><polyline points=""/></svg>
+        <span class="knife" aria-hidden="true">🔪</span>
+      </div>
+      <div class="scene-bottom">
+        <button class="j-btn primary" id="j-to-gift" hidden>One more thing… →</button>
+      </div>
+    </section>
+
+    <section class="scene" data-scene="gift">
+      <div class="scene-top">
+        <p class="j-eyebrow" id="j-gift-eyebrow">one more thing</p>
+        <h2 id="j-gift-title">Kunal made something for you</h2>
+        <p class="j-sub" id="j-gift-sub">wrapped with a lot of love (and a little help)</p>
+      </div>
+      <div class="gift-stage">
+        <button class="gift" id="j-gift" aria-label="Unwrap your gift">
+          <span class="gift-lid"><span class="bow"></span></span>
+          <span class="gift-box"></span>
+        </button>
+        <button class="envelope" id="j-envelope" aria-label="Open your letter" hidden>
+          <span class="env-back"></span>
+          <span class="letter"><span class="script">For Gayatri</span><small>with love</small></span>
+          <span class="env-front"></span>
+          <span class="env-flap"></span>
+          <span class="seal">♥</span>
+        </button>
+      </div>
+      <div class="scene-bottom"><p class="j-hint" id="j-gift-hint">tap to unwrap</p></div>
+    </section>
+  </div>
 
   <main id="story">
     <section class="welcome">
@@ -44,14 +127,22 @@
         <p class="kicker">and finally</p>
         <h2 class="script">From Kunal</h2>
         <div id="closing-body" class="closing-body"></div>
+        <div class="secret">
+          <p class="secret-hint">one last secret, just for you. scratch it ✨</p>
+          <div class="scratch" id="scratch">
+            <!-- edit this line freely -->
+            <p>You are my favourite person,<br>today and every day.</p>
+            <canvas aria-label="Scratch to reveal"></canvas>
+          </div>
+        </div>
         <p class="signoff">Happy birthday, my love. ♡</p>
       </div>
     </section>
   </main>
 
-  <button class="music-btn intro" id="music" hidden aria-label="Background music" aria-pressed="true">
+  <button class="music-btn" id="music" hidden aria-label="Background music" aria-pressed="false">
+    <span class="note-icon" aria-hidden="true">♪</span>
     <span class="eq" aria-hidden="true"><i></i><i></i><i></i></span>
-    <span class="label">tap for music</span>
   </button>
 
   <div class="lightbox" id="lightbox" hidden>
